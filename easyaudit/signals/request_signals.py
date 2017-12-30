@@ -5,6 +5,7 @@ from django.utils import six, timezone
 
 from easyaudit.models import RequestEvent
 from easyaudit.settings import UNREGISTERED_URLS, WATCH_REQUEST_EVENTS
+from easyaudit.utils import get_client_ip
 
 import re
 
@@ -16,7 +17,6 @@ def should_log_url(url):
         if pattern.match(url):
             return False
     return True
-
 
 def request_started_handler(sender, environ, **kwargs):
     if not should_log_url(environ['PATH_INFO']):
@@ -48,7 +48,7 @@ def request_started_handler(sender, environ, **kwargs):
         method=environ['REQUEST_METHOD'],
         query_string=environ['QUERY_STRING'],
         user=user,
-        remote_ip=environ['REMOTE_ADDR'],
+        remote_ip=get_client_ip(environ),
         datetime=timezone.now()
     )
 
