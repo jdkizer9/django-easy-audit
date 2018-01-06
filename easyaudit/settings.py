@@ -28,6 +28,7 @@ def get_model_list(class_list):
 WATCH_AUTH_EVENTS = getattr(settings, 'DJANGO_EASY_AUDIT_WATCH_AUTH_EVENTS', True)
 WATCH_MODEL_EVENTS = getattr(settings, 'DJANGO_EASY_AUDIT_WATCH_MODEL_EVENTS', True)
 WATCH_REQUEST_EVENTS = getattr(settings, 'DJANGO_EASY_AUDIT_WATCH_REQUEST_EVENTS', True)
+REMOTE_ADDR_HEADER = getattr(settings, 'DJANGO_EASY_AUDIT_REMOTE_ADDR_HEADER', 'REMOTE_ADDR')
 
 
 # Models which Django Easy Audit will not log.
@@ -76,3 +77,16 @@ for idx, callback in enumerate(CRUD_DIFFERENCE_CALLBACKS):
     if not callable(callback):  # keep as is if it is callable
         CRUD_DIFFERENCE_CALLBACKS[idx] = getattr(import_module('.'.join(callback.split('.')[:-1])),
                                                  callback.split('.')[-1], None)
+<<<<<<< HEAD
+=======
+
+# Purge table optimization:
+# If TRUNCATE_TABLE_SQL_STATEMENT is not empty, we use it as custom sql statement
+# to speed up table truncation bypassing ORM, i.e.:
+#   DJANGO_EASY_AUDIT_TRUNCATE_TABLE_SQL_STATEMENT = 'TRUNCATE TABLE "{db_table}"'  # for Postgresql
+# Else we use Django Orm as follows:
+#   model.objects.all().delete()
+# which is however much costly when many rows are involved
+TRUNCATE_TABLE_SQL_STATEMENT = getattr(settings, 'DJANGO_EASY_AUDIT_TRUNCATE_TABLE_SQL_STATEMENT', '')
+
+>>>>>>> master

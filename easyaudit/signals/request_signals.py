@@ -1,11 +1,17 @@
 from django.contrib.auth import get_user_model
 from django.contrib.sessions.models import Session
 from django.core.signals import request_started
+from django.http.cookie import SimpleCookie
 from django.utils import six, timezone
+from django.conf import settings
 
 from easyaudit.models import RequestEvent
+<<<<<<< HEAD
 from easyaudit.settings import UNREGISTERED_URLS, WATCH_REQUEST_EVENTS
 from easyaudit.utils import get_client_ip
+=======
+from easyaudit.settings import REMOTE_ADDR_HEADER, UNREGISTERED_URLS, WATCH_REQUEST_EVENTS
+>>>>>>> master
 
 import re
 
@@ -24,12 +30,13 @@ def request_started_handler(sender, environ, **kwargs):
 
     # get the user from cookies
     user = None
-    if 'HTTP_COOKIE' in environ:
-        cookie = six.moves.http_cookies.SimpleCookie() # python3 compatibility
+    if environ.get('HTTP_COOKIE'):
+        cookie = SimpleCookie() # python3 compatibility
         cookie.load(environ['HTTP_COOKIE'])
 
-        if 'sessionid' in cookie:
-            session_id = cookie['sessionid'].value
+        session_cookie_name = settings.SESSION_COOKIE_NAME
+        if session_cookie_name in cookie:
+            session_id = cookie[session_cookie_name].value
 
             try:
                 session = Session.objects.get(session_key=session_id)
@@ -37,7 +44,7 @@ def request_started_handler(sender, environ, **kwargs):
                 session = None
 
             if session:
-                user_id = session.get_decoded()['_auth_user_id']
+                user_id = session.get_decoded().get('_auth_user_id')
                 try:
                     user = get_user_model().objects.get(id=user_id)
                 except:
@@ -48,7 +55,11 @@ def request_started_handler(sender, environ, **kwargs):
         method=environ['REQUEST_METHOD'],
         query_string=environ['QUERY_STRING'],
         user=user,
+<<<<<<< HEAD
         remote_ip=get_client_ip(environ),
+=======
+        remote_ip=environ[REMOTE_ADDR_HEADER],
+>>>>>>> master
         datetime=timezone.now()
     )
 
