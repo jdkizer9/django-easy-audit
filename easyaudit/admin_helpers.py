@@ -13,20 +13,22 @@ from django.utils.translation import ugettext_lazy as _
 from django.contrib import messages
 from django.conf.urls import url
 from django.utils.safestring import mark_safe
+from django.utils.html import escape
 from . import settings
 
 import json
 
-
 def prettify_json(json_string):
     """Given a JSON string, it returns it as a
     safe formatted HTML"""
+    escaped = escape(json_string)
     try:
-        data = json.loads(json_string)
-        html = '<pre>' + json.dumps(data, sort_keys=True, indent=4) + '</pre>'
+        data = json.loads(escaped)
+        # html = '<pre>' + json.dumps(data, sort_keys=True, indent=4) + '</pre>'
+        html = json.dumps(data, sort_keys=True, indent=4)
     except:
-        html = json_string
-    return mark_safe(html)
+        html = escaped
+    return html
 
 
 class EasyAuditModelAdmin(admin.ModelAdmin):
@@ -38,13 +40,14 @@ class EasyAuditModelAdmin(admin.ModelAdmin):
             return '-'
         try:
             user_model = get_user_model()
+            escaped = escape(str(user))
             url = reverse("admin:%s_%s_change" % (
                 user_model._meta.app_label,
                 user_model._meta.model_name,
             ), args=(user.id,))
-            html = '<a href="%s">%s</a>' % (url, str(user))
+            html = '<a href="%s">%s</a>' % (url, escaped)
         except:
-            html = str(user)
+            html = escape(str(user))
         return mark_safe(html)
     user_link.short_description = 'user'
 
